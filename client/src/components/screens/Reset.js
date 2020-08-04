@@ -2,36 +2,30 @@ import React, { useState, useContext } from "react";
 import { Link, useHistory } from "react-router-dom";
 import { userContext } from "../../App";
 import M from "materialize-css";
-const Login = () => {
-    const { state, dispatch } = useContext(userContext);
+const Reset = () => {
     const history = useHistory();
+    const { state, dispatch } = useContext(userContext);
     const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
     const PostData = () => {
         if (!(/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(email))) {
             M.toast({ html: "Invalid email", classes: "#d32f2f red darken-2" });
             return null;
         }
-        fetch("/login", {
+        fetch("/reset-password", {
                 method: "post",
                 headers: {
                     "Content-type": "application/json"
                 },
                 body: JSON.stringify({
                     email,
-                    password
                 })
             }).then(res => res.json())
             .then(data => {
-                // console.log(data);
                 if (data.error) {
                     M.toast({ html: data.error, classes: "#d32f2f red darken-2" });
                 } else {
-                    localStorage.setItem("jwt", data.token);
-                    localStorage.setItem("user", JSON.stringify(data.user));
-                    dispatch({ type: "USER", payload: data.user });
-                    M.toast({ html: "Signed in Successfully", classes: "#42a5f5 green darken-1" });
-                    history.push("/");
+                    M.toast({ html: data.message, classes: "#42a5f5 green darken-1" });
+                    history.push("/login");
                 }
             }).catch(err => { console.log(err); })
     }
@@ -52,28 +46,14 @@ const Login = () => {
         onChange = {
             (e) => setEmail(e.target.value)
         }
-        />  <
-        input type = "password"
-        placeholder = "password"
-        value = { password }
-        onChange = {
-            (e) => setPassword(e.target.value)
-        }
-        />    <
+        />     <
         button className = "btn waves-effect waves-light #64b5f6 blue darken-2"
         onClick = {
             () => PostData()
         } >
-        Login < /button>    <
-        h5 >
-        <
-        Link to = "/signup" > Don 't have an account?</Link>  </h5>  <
-        h5 >
-        <
-        Link to = "/reset" > Forgot Password < /Link> <
-        /h5> <
-        /div> </div >
+        Reset Password < /button>    <
+        /div>  </div >
     )
 }
 
-export default Login;
+export default Reset;

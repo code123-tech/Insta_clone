@@ -8,6 +8,8 @@ import Signup from "./components/screens/Signup";
 import CreatePost from "./components/screens/CreatePost";
 import UserProfile from "./components/screens/UserProfile";
 import SubscribedUserPosts from "./components/screens/SubscribedUserPosts";
+import Password from "./components/screens/NewPassword";
+import Reset from "./components/screens/Reset";
 import './App.css';
 import { reducer, initialState } from "./reducer/userReducer";
 
@@ -22,7 +24,8 @@ const Routing = () => {
             dispatch({ type: "USER", payload: user });
             // history.push("/");
         } else {
-            history.push("/login");
+            if (!history.location.pathname.startsWith("/reset"))
+                history.push("/login");
         }
     }, []);
     return ( <
@@ -37,34 +40,43 @@ const Routing = () => {
         <
         Login / >
         <
-        /Route>   <
+        /Route>    <
         Route path = "/signup" >
         <
         Signup / >
         <
-        /Route>   <
+        /Route>    <
         Route exact path = "/profile" >
         <
         Profile / >
         <
-        /Route>   <
+        /Route>    <
         Route path = "/createpost" >
         <
         CreatePost / >
         <
-        /Route> <
+        /Route>  <
         Route path = "/profile/:userid" >
         <
         UserProfile / >
         <
-        /Route>  <
+        /Route>   <
         Route path = "/myfollowingpost" >
         <
         SubscribedUserPosts / >
         <
         /Route> <
-        /
-        Switch >
+        Route exact path = "/reset" >
+        <
+        Reset / >
+        <
+        /Route> <
+        Route path = "/reset/:token" >
+        <
+        Password / >
+        <
+        /Route> <
+        /Switch>
     )
 }
 
@@ -81,8 +93,8 @@ function App() {
         <
         Routing / >
         <
-        /BrowserRouter>  < /
-        userContext.Provider >
+        /BrowserRouter>   <
+        /userContext.Provider>
     );
 }
 

@@ -34,32 +34,33 @@ const Signup = () => {
 
 
     const uploadFields = () => {
-        if (!(/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(email))) {
-            M.toast({ html: "Invalid email", classes: "#d32f2f red darken-2" });
-            return null;
+        if (!/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(email)) {
+            M.toast({ html: "invalid email", classes: "#c62828 red darken-3" })
+            return
         }
         fetch("/signup", {
                 method: "post",
                 headers: {
-                    "Content-type": "application/json"
+                    "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
                     name,
-                    email,
                     password,
+                    email,
                     pic: url
                 })
             }).then(res => res.json())
             .then(data => {
                 if (data.error) {
-                    M.toast({ html: data.error, classes: "#d32f2f red darken-2" });
+                    M.toast({ html: data.error, classes: "#c62828 red darken-3" })
                 } else {
-                    M.toast({ html: data.message, classes: "#42a5f5 blue darken-1" });
-                    history.push("/login");
+                    M.toast({ html: data.message, classes: "#43a047 green darken-1" })
+                    history.push('/login')
                 }
-            }).catch(err => { console.log(err); })
+            }).catch(err => {
+                console.log(err)
+            })
     }
-
     const PostData = () => {
         if (image) {
             UploadPic()
@@ -112,15 +113,15 @@ const Signup = () => {
         onChange = {
             (e) => setImage(e.target.files[0])
         }
-        />  <
-        /div>  <
+        />  < /
+        div > <
         div className = "file-path-wrapper" >
         <
         input className = "file-path validate"
         type = "text" / >
         <
-        /div>    <
-        /div>
+        /div>    < /
+        div >
 
 
 

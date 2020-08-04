@@ -3,24 +3,37 @@ const express = require("express");
 const router = express.Router();
 const mongoose = require('mongoose');
 const User = mongoose.model("user");
+const crypto = require('crypto')
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { JWT_SECRET } = require('../config/keys')
-const requiredLogin = require("../middleware/requireLogin");
+const { JWT_SECRET, EMAIL } = require('../config/keys');
+const nodemailer = require("nodemailer");
+// const { networkInterfaces } = require('os');
+// const sendgridTransport = require('nodemailer-sendgrid-transport');
+// const sgMail = require('@sendgrid/mail');
+// SG.L-A-3NNXSYC2f6xRvkUO7A.U3jIN5xxYvlm5vIz1AI2N3o7JiEjgvYqqgvhzjRYUOY
 
-router.get("/protected", requiredLogin, (req, res) => {
-    res.send("Hello User");
+const transporter = nodemailer.createTransport({
+    service: "Gmail",
+    auth: {
+        user: 'swapnilagarwal2001@gmail.com',
+        pass: EMAIL
+    }
 })
 
-router.post("/signup", (req, res) => {
-    const { name, email, password, pic } = req.body;
-    if (!name || !email || !password) {
-        return res.status(422).json({ error: "please fill all the fields." });
+
+
+
+router.post('/signup', (req, res) => {
+    // console.log(req.body);
+    const { name, email, password, pic } = req.body
+    if (!email || !password || !name) {
+        return res.status(422).json({ error: "please add all the fields" })
     }
     User.findOne({ email: email })
         .then((savedUser) => {
             if (savedUser) {
-                return res.status(422).json({ error: "user already exist with that email." });
+                return res.status(422).json({ error: "user already exists with that email" })
             }
             bcrypt.hash(password, 12)
                 .then(hashedpassword => {
@@ -28,18 +41,35 @@ router.post("/signup", (req, res) => {
                         email,
                         password: hashedpassword,
                         name,
-                        pic: pic
-                    });
-                    user.save().then(user => {
-                        res.json({ message: "saved successfully" });
-                    }).catch(err => {
-                        console.log(err);
-                    });
-                }).catch(err => {
-                    console.log(err);
-                });
+                        pic
+                    })
+
+                    user.save()
+                        .then(user => {
+                            transporter.sendMail({
+                                from: 'swapnilagarwal2001@gmail.com',
+                                to: user.email,
+                                subject: 'Signup Success',
+                                html: '<h1> Welcome To WebPics2020 </h1>',
+                            }, (err, data) => {
+                                if (err) {
+                                    console.log(err);
+                                } else {
+                                    console.log('Email sent successfully');
+                                }
+                            });
+                            res.json({ message: "saved successfully" })
+                        })
+                        .catch(err => {
+                            console.log(err)
+                        })
+                })
+
         })
-});
+        .catch(err => {
+            console.log(err)
+        })
+})
 
 router.post("/login", (req, res) => {
     const { email, password } = req.body;
@@ -64,4 +94,60 @@ router.post("/login", (req, res) => {
                 }).catch(err => { console.log(err); });
         })
 });
+
+router.post("/reset-password", (req, res) => {
+    crypto.randomBytes(32, (err, buffer) => {
+        if (err) {
+            console.log(err);
+        }
+        const token = buffer.toString("hex");
+        User.findOne({ email: req.body.email })
+            .then(user => {
+                if (!user) {
+                    return res.status(422).json({ error: "User doesn't exist with that mail" })
+                }
+                user.resetToken = token;
+                user.expireToken = Date.now() + 3600000
+                    // console.log(user.expireToken);
+                user.save().then((result) => {
+                    transporter.sendMail({
+                        from: 'swapnilagarwal2001@gmail.com',
+                        to: user.email,
+                        subject: 'password Reset.',
+                        html: `<p>Your Request For Password Reset</p>
+                            <h5>Click On this click <a href="https://webpics2020.herokuapp.com/reset/${token}">link</a> to rest Password</h5>
+                        `
+                    }, (err, data) => {
+                        if (err) {
+                            console.log(err);
+                        } else {
+                            console.log('Email sent successfully');
+                        }
+                    });
+                    res.json({ message: "Check Your Email." })
+                })
+            })
+    })
+})
+
+router.post("/new-password", (req, res) => {
+    const newPassword = req.body.password;
+    const sentToken = req.body.token;
+    User.findOne({ resetToken: sentToken })
+        .then(user => {
+            if (!user) {
+                return res.status(422).json({ error: "Try Again session expired." })
+            }
+            bcrypt.hash(newPassword, 12).then(hashedpassword => {
+                user.password = hashedpassword;
+                user.resetToken = undefined;
+                // user.expireToken = undefined;
+                user.save().then((savedUser) => {
+                    res.json({ message: "password Updated Success" })
+                })
+            })
+        }).catch(err => {
+            console.log(err);
+        })
+})
 module.exports = router;
