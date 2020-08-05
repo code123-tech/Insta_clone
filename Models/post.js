@@ -22,6 +22,6 @@ const postSchema = new mongoose.Schema({
         type: ObjectId,
         ref: "user"
     }
-});
+}, { timestamps: true });
 
 mongoose.model("post", postSchema);

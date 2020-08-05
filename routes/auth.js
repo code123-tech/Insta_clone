@@ -11,7 +11,7 @@ const nodemailer = require("nodemailer");
 // const { networkInterfaces } = require('os');
 // const sendgridTransport = require('nodemailer-sendgrid-transport');
 // const sgMail = require('@sendgrid/mail');
-// SG.L-A-3NNXSYC2f6xRvkUO7A.U3jIN5xxYvlm5vIz1AI2N3o7JiEjgvYqqgvhzjRYUOY
+// 
 
 const transporter = nodemailer.createTransport({
     service: "Gmail",

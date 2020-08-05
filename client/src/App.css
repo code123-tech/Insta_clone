@@ -91,3 +91,10 @@ a {
     padding: 20px;
     text-align: center;
 }
+
+
+/* Navbar */
+
+.collection-item {
+    width: 100%;
+}
